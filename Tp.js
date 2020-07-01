@@ -12,6 +12,8 @@ let truckList = [
     {id:"3" , available:"True" , speed:Math.random() * 50 + 50 , capacity:Math.random() * 90 + 10},
 ];
 //Constantes------------------------------------------------------------------------------------------------------------
+
+
 const R = require('ramda');
 
 const oilPricePerDistance = 100;
@@ -61,20 +63,20 @@ const buyTruck = () =>{
 }
 
 const isAvailable = R.filter(truck => truck.available === 'True');
-const HasEnoughCapacity = R.reject(truck => truck.capacity <= CurrentOffer.boxes);
-const getIdOfTruck  =
+const HasEnoughCapacity = (offer) => { return (R.reject(truck => truck.capacity <= offer.boxes)); }
+const getIdOfTruck = (offer) =>
     R.pipe(
         isAvailable,
-        HasEnoughCapacity,
+        HasEnoughCapacity(offer),
         R.any(truck => truck.id),
         Math.max
     )(truckList);
 
+
 //Controller ----------------------------------------------------------------------------------------------------------
 const TruckManager = (offer) => {
-    CurrentOffer = offer;
     buyTruck();
-    let currentTruckId = getIdOfTruck;
+    let currentTruckId = getIdOfTruck(offer);
     console.log("Offer for " + String(offer.boxes) + " boxes at " + String(offer.pricePerBox) +
         " euros each, with " + String(offer.travel) + " of travel time");
     if(isNaN(currentTruckId)) {
@@ -108,6 +110,9 @@ const truck_emitter = () => {
     });
 }
 
+const argent_emitter = (offer) => {
+    marketEvent.emit('New Argent', gagnerArgent(offer));
+}
 const emitter_ = () => {
     marketEvent.emit('New Offer', {
         pricePerBox: Math.ceil(Math.random() * 10),
